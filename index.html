@@ -3,41 +3,127 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DSNI 120 SketchUp Video Test</title>
+  <title>DSNI 120 SketchUp Mastery</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f4f4f4;
+      color: #222;
+    }
+
+    .lesson {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    .video {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      margin: 20px 0;
+    }
+
+    .video iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    .task {
+      background: #eeeeee;
+      padding: 16px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #status {
+      margin-top: 16px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>DSNI 120 SketchUp Video Test</h1>
-  <p>If the video below plays, the web-page portion of our test works.</p>
 
-  <iframe
-    width="800"
-    height="450"
-    src="https://www.youtube.com/embed/0bPreK30yz0"
-    title="SketchUp Tutorial Test"
-    frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-    allowfullscreen>
-  </iframe>
-  <br><br>
+<div class="lesson">
 
-<button onclick="sendToSketchUp()">
-  Test SketchUp Connection
-</button>
+  <h1>Lesson 01 · Rectangle Tool</h1>
 
-<p id="status">Waiting for button test...</p>
+  <p>Watch the tutorial, then complete the task in SketchUp.</p>
+
+  <div class="video">
+    <iframe
+      src="https://www.youtube.com/embed/0bPreK30yz0"
+      title="SketchUp Tutorial"
+      allowfullscreen>
+    </iframe>
+  </div>
+
+  <div class="task">
+    <strong>Your Task</strong>
+    <p>Draw one rectangle somewhere in your SketchUp model.</p>
+  </div>
+
+  <button onclick="checkMyWork()">
+    CHECK MY WORK
+  </button>
+
+  <p id="status">Lesson not yet checked.</p>
+
+</div>
 
 <script>
-  function sendToSketchUp() {
-    if (window.sketchup && window.sketchup.test_connection) {
-      window.sketchup.test_connection("Hello from the GitHub lesson page!");
-      document.getElementById("status").innerText =
-        "Message sent to SketchUp.";
-    } else {
-      document.getElementById("status").innerText =
-        "SketchUp connection not detected.";
-    }
+
+function checkMyWork() {
+
+  document.getElementById("status").innerText =
+    "Checking your SketchUp model...";
+
+  if (window.sketchup && window.sketchup.check_lesson_01) {
+
+    window.sketchup.check_lesson_01();
+
+  } else {
+
+    document.getElementById("status").innerText =
+      "Open this lesson inside SketchUp to check your work.";
+
   }
+}
+
+function showResult(passed) {
+
+  if (passed) {
+
+    document.getElementById("status").innerHTML =
+      "✓ MASTERED<br>Lesson 01 complete.";
+
+  } else {
+
+    document.getElementById("status").innerHTML =
+      "NOT YET<br>I couldn't find a rectangle. Try again and check your work.";
+
+  }
+}
+
 </script>
+
 </body>
 </html>

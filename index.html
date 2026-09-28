@@ -19,5 +19,25 @@
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
     allowfullscreen>
   </iframe>
+  <br><br>
+
+<button onclick="sendToSketchUp()">
+  Test SketchUp Connection
+</button>
+
+<p id="status">Waiting for button test...</p>
+
+<script>
+  function sendToSketchUp() {
+    if (window.sketchup && window.sketchup.test_connection) {
+      window.sketchup.test_connection("Hello from the GitHub lesson page!");
+      document.getElementById("status").innerText =
+        "Message sent to SketchUp.";
+    } else {
+      document.getElementById("status").innerText =
+        "SketchUp connection not detected.";
+    }
+  }
+</script>
 </body>
 </html>

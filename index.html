@@ -244,6 +244,16 @@ function moveLesson(offset) {
 function setProgress(progress, preserveCurrent) {
 
   completedLessons = new Set(progress.completed_lessons || []);
+
+  completedLessons.forEach(function(lessonId) {
+    var status = document.getElementById("status-" + lessonId);
+    if (!status) return;
+
+    var lessonNumber = lessonId.replace("lesson_", "");
+    status.innerHTML =
+      "✓ MASTERED<br>Lesson " + lessonNumber + " complete.";
+  });
+
   var requestedLesson = preserveCurrent ? currentLessonId : progress.current_lesson;
   showLesson(availableLessonIds().includes(requestedLesson) ? requestedLesson : "lesson_01");
 }

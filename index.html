@@ -48,17 +48,39 @@
     .lesson-nav {
       display: flex;
       gap: 8px;
-      margin-bottom: 22px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .lesson-nav button,
+    .lesson-nav select {
+      background: #eeeeee;
+      border: 1px solid #777;
+      min-height: 46px;
     }
 
     .lesson-nav button {
-      background: #eeeeee;
-      border: 1px solid #777;
+      width: 52px;
+      padding: 10px;
+      font-size: 22px;
     }
 
-    .lesson-nav button.active {
-      background: #222;
-      color: white;
+    .lesson-nav select {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .lesson-nav button:disabled {
+      cursor: not-allowed;
+      opacity: 0.35;
+    }
+
+    #progress-summary {
+      margin: 0 0 22px;
+      color: #555;
+      font-size: 14px;
     }
 
     .lesson-panel[hidden] {
@@ -85,9 +107,15 @@
 <div class="lesson">
 
   <div class="lesson-nav" aria-label="Lessons">
-    <button id="nav-lesson_01" class="active" onclick="showLesson('lesson_01')">LESSON 01</button>
-    <button id="nav-lesson_02" onclick="showLesson('lesson_02')">LESSON 02</button>
+    <button id="previous-lesson" type="button" aria-label="Previous lesson">‹</button>
+    <select id="lesson-picker" aria-label="Choose a lesson">
+      <option value="lesson_01" data-label="Lesson 01 · Rectangle Tool">Lesson 01 · Rectangle Tool</option>
+      <option value="lesson_02" data-label="Lesson 02 · Push/Pull Tool">Lesson 02 · Push/Pull Tool</option>
+    </select>
+    <button id="next-lesson" type="button" aria-label="Next lesson">›</button>
   </div>
+
+  <p id="progress-summary">Loading your progress…</p>
 
   <section id="lesson_01" class="lesson-panel">
 
@@ -147,15 +175,77 @@
 
 <script>
 
+var lessonIds = ["lesson_01", "lesson_02"];
+var completedLessons = new Set();
+var currentLessonId = "lesson_01";
+
+function availableLessonIds() {
+
+  var firstIncomplete = lessonIds.find(function(lessonId) {
+    return !completedLessons.has(lessonId);
+  });
+
+  var lastAvailableIndex = firstIncomplete ?
+    lessonIds.indexOf(firstIncomplete) : lessonIds.length - 1;
+
+  return lessonIds.slice(0, lastAvailableIndex + 1);
+}
+
+function refreshNavigation() {
+
+  var available = availableLessonIds();
+  var picker = document.getElementById("lesson-picker");
+
+  Array.from(picker.options).forEach(function(option) {
+    option.disabled = !available.includes(option.value);
+    option.textContent = option.dataset.label +
+      (completedLessons.has(option.value) ? " ✓" : "");
+  });
+
+  picker.value = currentLessonId;
+
+  var currentIndex = available.indexOf(currentLessonId);
+  document.getElementById("previous-lesson").disabled = currentIndex <= 0;
+  document.getElementById("next-lesson").disabled =
+    currentIndex < 0 || currentIndex >= available.length - 1;
+
+  var summary = document.getElementById("progress-summary");
+  if (completedLessons.size === lessonIds.length) {
+    summary.textContent = "All available lessons complete. Use the menu to review them.";
+  } else {
+    summary.textContent = completedLessons.size + " of " + lessonIds.length +
+      " complete. Your next lesson is selected.";
+  }
+}
+
 function showLesson(lessonId) {
+
+  if (!availableLessonIds().includes(lessonId)) return;
+
+  currentLessonId = lessonId;
 
   document.querySelectorAll(".lesson-panel").forEach(function(panel) {
     panel.hidden = panel.id !== lessonId;
   });
 
-  document.querySelectorAll(".lesson-nav button").forEach(function(button) {
-    button.classList.toggle("active", button.id === "nav-" + lessonId);
-  });
+  refreshNavigation();
+}
+
+function moveLesson(offset) {
+
+  var available = availableLessonIds();
+  var nextIndex = available.indexOf(currentLessonId) + offset;
+
+  if (nextIndex >= 0 && nextIndex < available.length) {
+    showLesson(available[nextIndex]);
+  }
+}
+
+function setProgress(progress, preserveCurrent) {
+
+  completedLessons = new Set(progress.completed_lessons || []);
+  var requestedLesson = preserveCurrent ? currentLessonId : progress.current_lesson;
+  showLesson(availableLessonIds().includes(requestedLesson) ? requestedLesson : "lesson_01");
 }
 
 function checkMyWork(lessonId) {
@@ -184,6 +274,9 @@ function showResult(lessonId, passed) {
 
   if (passed) {
 
+    completedLessons.add(lessonId);
+    refreshNavigation();
+
     status.innerHTML =
       "✓ MASTERED<br>Lesson " + lessonNumber + " complete.";
 
@@ -195,6 +288,29 @@ function showResult(lessonId, passed) {
 
   }
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+
+  document.getElementById("lesson-picker").addEventListener("change", function(event) {
+    showLesson(event.target.value);
+  });
+
+  document.getElementById("previous-lesson").addEventListener("click", function() {
+    moveLesson(-1);
+  });
+
+  document.getElementById("next-lesson").addEventListener("click", function() {
+    moveLesson(1);
+  });
+
+  refreshNavigation();
+
+  if (window.sketchup && window.sketchup.lesson_page_ready) {
+    window.sketchup.lesson_page_ready();
+  } else {
+    setProgress({ completed_lessons: [], current_lesson: "lesson_01" }, false);
+  }
+});
 
 </script>
 

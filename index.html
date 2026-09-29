@@ -45,6 +45,26 @@
       margin: 20px 0;
     }
 
+    .lesson-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .lesson-nav button {
+      background: #eeeeee;
+      border: 1px solid #777;
+    }
+
+    .lesson-nav button.active {
+      background: #222;
+      color: white;
+    }
+
+    .lesson-panel[hidden] {
+      display: none;
+    }
+
     button {
       width: 100%;
       padding: 14px;
@@ -53,7 +73,7 @@
       cursor: pointer;
     }
 
-    #status {
+    [id^="status-"] {
       margin-top: 16px;
       font-weight: bold;
     }
@@ -63,6 +83,13 @@
 <body>
 
 <div class="lesson">
+
+  <div class="lesson-nav" aria-label="Lessons">
+    <button id="nav-lesson_01" class="active" onclick="showLesson('lesson_01')">LESSON 01</button>
+    <button id="nav-lesson_02" onclick="showLesson('lesson_02')">LESSON 02</button>
+  </div>
+
+  <section id="lesson_01" class="lesson-panel">
 
   <h1>Lesson 01 · Rectangle Tool</h1>
 
@@ -81,44 +108,90 @@
     <p>Draw one rectangle somewhere in your SketchUp model.</p>
   </div>
 
-  <button onclick="checkMyWork()">
+  <button onclick="checkMyWork('lesson_01')">
     CHECK MY WORK
   </button>
 
-  <p id="status">Lesson not yet checked.</p>
+  <p id="status-lesson_01">Lesson not yet checked.</p>
+
+  </section>
+
+  <section id="lesson_02" class="lesson-panel" hidden>
+
+  <h1>Lesson 02 · Push/Pull Tool</h1>
+
+  <p>Watch the tutorial, then turn your rectangle into a 3D form.</p>
+
+  <div class="video">
+    <iframe
+      src="https://www.youtube.com/embed/xTzh4KGuXzE"
+      title="SketchUp Push Pull Tool Tutorial"
+      allowfullscreen>
+    </iframe>
+  </div>
+
+  <div class="task">
+    <strong>Your Task</strong>
+    <p>Use Push/Pull on a rectangle to create one rectangular box.</p>
+  </div>
+
+  <button onclick="checkMyWork('lesson_02')">
+    CHECK MY WORK
+  </button>
+
+  <p id="status-lesson_02">Lesson not yet checked.</p>
+
+  </section>
 
 </div>
 
 <script>
 
-function checkMyWork() {
+function showLesson(lessonId) {
 
-  document.getElementById("status").innerText =
+  document.querySelectorAll(".lesson-panel").forEach(function(panel) {
+    panel.hidden = panel.id !== lessonId;
+  });
+
+  document.querySelectorAll(".lesson-nav button").forEach(function(button) {
+    button.classList.toggle("active", button.id === "nav-" + lessonId);
+  });
+}
+
+function checkMyWork(lessonId) {
+
+  document.getElementById("status-" + lessonId).innerText =
     "Checking your SketchUp model...";
 
-  if (window.sketchup && window.sketchup.check_lesson_01) {
+  var callbackName = "check_" + lessonId;
 
-    window.sketchup.check_lesson_01();
+  if (window.sketchup && window.sketchup[callbackName]) {
+
+    window.sketchup[callbackName]();
 
   } else {
 
-    document.getElementById("status").innerText =
+    document.getElementById("status-" + lessonId).innerText =
       "Open this lesson inside SketchUp to check your work.";
 
   }
 }
 
-function showResult(passed) {
+function showResult(lessonId, passed) {
+
+  var lessonNumber = lessonId === "lesson_02" ? "02" : "01";
+  var status = document.getElementById("status-" + lessonId);
 
   if (passed) {
 
-    document.getElementById("status").innerHTML =
-      "✓ MASTERED<br>Lesson 01 complete.";
+    status.innerHTML =
+      "✓ MASTERED<br>Lesson " + lessonNumber + " complete.";
 
   } else {
 
-    document.getElementById("status").innerHTML =
-      "NOT YET<br>I couldn't find a rectangle. Try again and check your work.";
+    var missing = lessonId === "lesson_02" ? "a rectangular box" : "a rectangle";
+    status.innerHTML =
+      "NOT YET<br>I couldn't find " + missing + ". Try again and check your work.";
 
   }
 }
